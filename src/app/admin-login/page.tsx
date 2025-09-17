@@ -43,11 +43,15 @@ const Login: React.FC = () => {
       });
       const code = generateCode();
       router.push(`/admin-dashboard/${code}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      let message = "Something went wrong";
+      if (error instanceof Error) {
+        message = error.message;
+      }
       Swal.fire({
         icon: "error",
         title: "Login failed",
-        text: error.message || "Something went wrong",
+        text: message,
       });
     } finally {
       setLoading(false);
