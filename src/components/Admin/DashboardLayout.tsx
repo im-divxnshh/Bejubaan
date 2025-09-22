@@ -8,7 +8,7 @@ import {
   LogoutOutlined,
   HomeOutlined,
   UserOutlined,
-  SettingOutlined,
+  UserAddOutlined,
 } from "@ant-design/icons";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
@@ -34,8 +34,15 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
   const menuItems = [
     { key: "1", icon: <HomeOutlined />, label: "Dashboard" },
     { key: "2", icon: <UserOutlined />, label: "Users" },
-    { key: "3", icon: <SettingOutlined />, label: "Settings" },
+    { key: "3", icon: <UserAddOutlined />, label: "Adding Doctor" },
   ];
+
+  const handleMenuClick = (e: { key: string }) => {
+    if (e.key === "1") router.push("/admin-dashboard/${code}");
+    if (e.key === "2") router.push("/admin-dashboard/${code}/user-section");
+    if (e.key === "3") router.push("/admin-dashboard/${code}/adding-doctors");
+  };
+
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -45,7 +52,12 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
           <div className="text-center text-white py-4 text-lg font-bold">
             {collapsed ? "ADM" : "Admin Panel"}
           </div>
-          <Menu theme="dark" mode="inline" items={menuItems} />
+          <Menu
+            theme="dark"
+            mode="inline"
+            items={menuItems}
+            onClick={handleMenuClick}
+          />
         </Sider>
       )}
 

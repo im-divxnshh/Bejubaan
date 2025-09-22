@@ -14,17 +14,15 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // ✅ Function to generate random code string
-  const generateCode = () => {
-    return Math.random().toString(36).substring(2, 10); // e.g. "a9x8p3kl"
-  };
+  // ✅ Generate random dashboard code
+  const generateCode = () => Math.random().toString(36).substring(2, 10);
 
   // ✅ Redirect if already logged in
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
       if (user) {
         const code = generateCode();
-        router.push(`/admin-dashboard/${code}`); // dynamic string route
+        router.push(`/bejubaan-doctor-dashboard`);
       }
     });
     return () => unsubscribe();
@@ -42,12 +40,10 @@ const Login: React.FC = () => {
         showConfirmButton: false,
       });
       const code = generateCode();
-      router.push(`/admin-dashboard/${code}`);
+      router.push(`/bejubaan-doctor-dashboard/`);
     } catch (error: unknown) {
       let message = "Something went wrong";
-      if (error instanceof Error) {
-        message = error.message;
-      }
+      if (error instanceof Error) message = error.message;
       Swal.fire({
         icon: "error",
         title: "Login failed",
@@ -59,41 +55,45 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <div className="flex h-screen items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-indigo-200">
       <Card
-        className="shadow-2xl rounded-2xl"
-        style={{ width: 400, background: "rgba(255, 255, 255, 0.9)" }}
+        className="shadow-2xl rounded-2xl border-0"
+        style={{ width: 420, background: "white" }}
       >
         <div className="text-center mb-6">
-          <Title level={2}>Bejubaan Admin Login</Title>
-          <Text type="secondary">Sign in with your account</Text>
+          <Title level={2} style={{ marginBottom: 0, color: "#3b82f6" }}>
+            Bejubaan Doctor Login
+          </Title>
+          <Text type="secondary">Enter your credentials to continue</Text>
         </div>
 
-        <Form
-          name="login"
-          layout="vertical"
-          onFinish={onFinish}
-          autoComplete="off"
-        >
+        <Form name="login" layout="vertical" onFinish={onFinish} autoComplete="off">
           <Form.Item
             name="email"
-            label="Email"
+            label={<span className="font-semibold">Email</span>}
             rules={[
               { required: true, message: "Please enter your email" },
               { type: "email", message: "Enter a valid email" },
             ]}
           >
-            <Input prefix={<MailOutlined />} placeholder="Enter your email" />
+            <Input
+              size="large"
+              prefix={<MailOutlined style={{ color: "#3b82f6" }} />}
+              placeholder="Enter your email"
+              className="rounded-lg"
+            />
           </Form.Item>
 
           <Form.Item
             name="password"
-            label="Password"
+            label={<span className="font-semibold">Password</span>}
             rules={[{ required: true, message: "Please enter your password" }]}
           >
             <Input.Password
-              prefix={<LockOutlined />}
+              size="large"
+              prefix={<LockOutlined style={{ color: "#3b82f6" }} />}
               placeholder="Enter your password"
+              className="rounded-lg"
             />
           </Form.Item>
 
@@ -101,9 +101,15 @@ const Login: React.FC = () => {
             <Button
               type="primary"
               htmlType="submit"
+              size="large"
               icon={<LoginOutlined />}
               block
               loading={loading}
+              className="rounded-lg shadow-md"
+              style={{
+                background: "linear-gradient(to right, #6366f1, #3b82f6)",
+                border: "none",
+              }}
             >
               Sign In
             </Button>
