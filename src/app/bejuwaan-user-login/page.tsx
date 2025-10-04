@@ -8,6 +8,7 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthState
 import { auth, db } from "../../utils/FirebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 import Swal from "sweetalert2";
+import { FirebaseError } from "firebase/app";
 
 const { Title, Text } = Typography;
 
@@ -51,11 +52,12 @@ const UserAuth: React.FC = () => {
         toast: true,
       });
       router.push(`/bejuwaan-user-dashboard`);
-    } catch (error: any) {
+    } catch (error) {
+      const e = error as FirebaseError;
       Swal.fire({
         icon: "error",
         title: "Login failed",
-        text: getFriendlyError(error.code),
+        text: getFriendlyError(e.code),
         position: "top-end",
         showConfirmButton: false,
         timer: 3000,
@@ -84,11 +86,12 @@ const UserAuth: React.FC = () => {
         toast: true,
       });
       router.push(`/bejuwaan-user-dashboard`);
-    } catch (error: any) {
+    } catch (error) {
+      const e = error as FirebaseError;
       Swal.fire({
         icon: "error",
         title: "Registration failed",
-        text: getFriendlyError(error.code),
+        text: getFriendlyError(e.code),
         position: "top-end",
         showConfirmButton: false,
         timer: 3000,
@@ -162,3 +165,4 @@ const UserAuth: React.FC = () => {
 };
 
 export default UserAuth;
+  
