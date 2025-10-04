@@ -17,8 +17,15 @@ import {
   LockOutlined,
 } from "@ant-design/icons";
 
+interface UserProfile {
+  name: string;
+  email: string;
+  mobile: string;
+  photoURL?: string | null;
+}
+
 const Profile: React.FC = () => {
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [editing, setEditing] = useState<boolean>(false);
   const [newName, setNewName] = useState("");
@@ -34,7 +41,7 @@ const Profile: React.FC = () => {
           const userRef = doc(db, "users", user.uid);
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
-            const data = userSnap.data();
+            const data = userSnap.data() as UserProfile;
             setUserData(data);
             setNewName(data.name || "");
             setNewMobile(data.mobile || "");
@@ -55,7 +62,7 @@ const Profile: React.FC = () => {
 
   // 💾 Save profile changes
   const handleSave = async () => {
-    if (!auth.currentUser) return;
+    if (!auth.currentUser || !userData) return;
     const uid = auth.currentUser.uid;
     const userRef = doc(db, "users", uid);
 
@@ -210,7 +217,7 @@ const Profile: React.FC = () => {
       {/* Info Fields */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         <div>
-          <label className="block text-gray-600 font-medium mb-1  items-center gap-1">
+          <label className="block text-gray-600 font-medium mb-1 items-center gap-1">
             <UserOutlined /> Name
           </label>
           <input
@@ -225,7 +232,7 @@ const Profile: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-gray-600 font-medium mb-1  items-center gap-1">
+          <label className="block text-gray-600 font-medium mb-1 items-center gap-1">
             <MailOutlined /> Email
           </label>
           <input
@@ -237,7 +244,7 @@ const Profile: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-gray-600 font-medium mb-1  items-center gap-1">
+          <label className="block text-gray-600 font-medium mb-1 items-center gap-1">
             <PhoneOutlined /> Mobile No.
           </label>
           <input
