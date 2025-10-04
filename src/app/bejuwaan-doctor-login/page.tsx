@@ -10,18 +10,14 @@ import Swal from "sweetalert2";
 
 const { Title, Text } = Typography;
 
-const Login: React.FC = () => {
+const DoctorLogin: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  // ✅ Generate random dashboard code
-  const generateCode = () => Math.random().toString(36).substring(2, 10);
 
   // ✅ Redirect if already logged in
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
       if (user) {
-        const code = generateCode();
         router.push(`/bejuwaan-doctor-dashboard`);
       }
     });
@@ -32,22 +28,38 @@ const Login: React.FC = () => {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
+
       Swal.fire({
         icon: "success",
         title: "Welcome back! 🎉",
         text: "You are now logged in.",
         timer: 2000,
         showConfirmButton: false,
+        position: "top-end",
+        toast: true,
       });
-      const code = generateCode();
+
       router.push(`/bejuwaan-doctor-dashboard/`);
     } catch (error: unknown) {
-      let message = "Something went wrong";
-      if (error instanceof Error) message = error.message;
+      let userFriendlyMessage = "Login failed. Please check your credentials.";
+
+      // Custom handling for common Firebase Auth errors
+      if (error instanceof Error) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes("wrong-password")) userFriendlyMessage = "Incorrect password. Please try again.";
+        else if (msg.includes("user-not-found")) userFriendlyMessage = "No account found with this email.";
+        else if (msg.includes("invalid-email")) userFriendlyMessage = "The email address is invalid.";
+        else if (msg.includes("too-many-requests")) userFriendlyMessage = "Too many failed attempts. Try again later.";
+      }
+
       Swal.fire({
         icon: "error",
-        title: "Login failed",
-        text: message,
+        title: "Oops!",
+        text: userFriendlyMessage,
+        position: "top-end",
+        toast: true,
+        timer: 3000,
+        showConfirmButton: false,
       });
     } finally {
       setLoading(false);
@@ -55,17 +67,28 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-indigo-200">
+    <div className="flex h-screen items-center justify-center bg-gradient-to-br from-green-200 via-green-300 to-green-400">
       <Card
         className="shadow-2xl rounded-2xl border-0"
         style={{ width: 420, background: "white" }}
       >
-        <div className="text-center mb-6">
-          <Title level={2} style={{ marginBottom: 0, color: "#3b82f6" }}>
-            bejuwaan Doctor Login
-          </Title>
-          <Text type="secondary">Enter your credentials to continue</Text>
+        <div className="flex items-center justify-center mb-6 space-x-4">
+          {/* Logo */}
+          <img
+            src="/logo.jpg"   
+            alt="Bejuwaan Logo"
+            className="w-12 h-12 rounded-full"
+          />
+
+          {/* Text */}
+          <div className="text-left">
+            <Title level={2} style={{ marginBottom: 0, color: "#16a34a" }}>
+              Bejuwaan Doctor Login
+            </Title>
+            <Text type="secondary">Enter your credentials to continue</Text>
+          </div>
         </div>
+
 
         <Form name="login" layout="vertical" onFinish={onFinish} autoComplete="off">
           <Form.Item
@@ -73,12 +96,12 @@ const Login: React.FC = () => {
             label={<span className="font-semibold">Email</span>}
             rules={[
               { required: true, message: "Please enter your email" },
-              { type: "email", message: "Enter a valid email" },
+              { type: "email", message: "Enter a valid email address" },
             ]}
           >
             <Input
               size="large"
-              prefix={<MailOutlined style={{ color: "#3b82f6" }} />}
+              prefix={<MailOutlined style={{ color: "#16a34a" }} />}
               placeholder="Enter your email"
               className="rounded-lg"
             />
@@ -91,7 +114,7 @@ const Login: React.FC = () => {
           >
             <Input.Password
               size="large"
-              prefix={<LockOutlined style={{ color: "#3b82f6" }} />}
+              prefix={<LockOutlined style={{ color: "#16a34a" }} />}
               placeholder="Enter your password"
               className="rounded-lg"
             />
@@ -107,7 +130,7 @@ const Login: React.FC = () => {
               loading={loading}
               className="rounded-lg shadow-md"
               style={{
-                background: "linear-gradient(to right, #6366f1, #3b82f6)",
+                background: "linear-gradient(to right, #22c55e, #16a34a)",
                 border: "none",
               }}
             >
@@ -120,4 +143,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default DoctorLogin;

@@ -36,7 +36,6 @@ import { useRouter } from "next/navigation";
 
 const { Footer, Content } = Layout;
 const { Title, Paragraph } = Typography;
-const { Step } = Steps;
 const { Search } = Input;
 
 export default function Home() {

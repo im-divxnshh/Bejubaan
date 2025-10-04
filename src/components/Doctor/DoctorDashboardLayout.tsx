@@ -31,7 +31,7 @@ const DoctorDashboardLayout: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const handleLogout = async () => {
     await signOut(auth);
-    router.push("/bejubaan-doctor-login");
+    router.push("/bejuwaan-doctor-login");
   };
 
   const menuItems = [
