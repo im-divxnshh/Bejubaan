@@ -142,8 +142,10 @@ const AddingDoctor: React.FC = () => {
             setPreviewPhoto(null);
             setPreviewAadhar(null);
             setPreviewPan(null);
-        } catch (error: any) {
-            Swal.fire({ icon: "error", title: "Error", text: error.message });
+        } catch (error: unknown) {
+            let message = "Unknown error";
+            if (error instanceof Error) message = error.message;
+            Swal.fire({ icon: "error", title: "Error", text: message });
         } finally {
             setLoading(false);
         }
@@ -183,8 +185,10 @@ const AddingDoctor: React.FC = () => {
             });
 
             setViewOpen(false);
-        } catch (error: any) {
-            Swal.fire({ icon: "error", title: "Error", text: error.message });
+        } catch (error: unknown) {
+            let message = "Unknown error";
+            if (error instanceof Error) message = error.message;
+            Swal.fire({ icon: "error", title: "Error", text: message });
         } finally {
             setLoadingDelete(false); // stop spinner
         }
@@ -220,7 +224,7 @@ const AddingDoctor: React.FC = () => {
                                         <Button
                                             danger
                                             icon={<DeleteOutlined />}
-                                            onClick={() => handleDelete(selectedDoctor?.id!)}
+                                            onClick={() => selectedDoctor && handleDelete(selectedDoctor.id)}
                                             className="rounded-lg px-5 py-2 font-semibold shadow hover:scale-105 transition-transform"
                                             loading={loadingDelete} // this will show spinner automatically
                                         >

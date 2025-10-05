@@ -10,7 +10,6 @@ export async function DELETE(req: NextRequest) {
 
     if (!uid) return NextResponse.json({ message: "UID is required" }, { status: 400 });
 
-    // 1️⃣ Get doctor document to fetch Storage URLs
     const docRef = doc(db, "doctors", uid);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) return NextResponse.json({ message: "Doctor not found" }, { status: 404 });
@@ -21,7 +20,6 @@ export async function DELETE(req: NextRequest) {
       panCardPhoto?: string;
     };
 
-    // 2️⃣ Delete profile photo, aadhar, pan from Storage
     const deleteStorageFile = async (url?: string) => {
       if (!url) return;
       try {
@@ -39,15 +37,14 @@ export async function DELETE(req: NextRequest) {
       deleteStorageFile(data.panCardPhoto),
     ]);
 
-    // 3️⃣ Delete Firestore document
     await deleteDoc(docRef);
-
-    // 4️⃣ Delete Firebase Auth user
     await admin.auth().deleteUser(uid);
 
     return NextResponse.json({ message: "Doctor deleted successfully" }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    let message = "Unknown error";
+    if (error instanceof Error) message = error.message;
     console.error(error);
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message }, { status: 500 });
   }
 }
