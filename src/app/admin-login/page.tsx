@@ -65,7 +65,12 @@ const Login: React.FC = () => {
         style={{ width: 400, background: "rgba(255, 255, 255, 0.9)" }}
       >
         <div className="text-center mb-6">
-          <Title level={2}>Bejuwan Admin Login</Title>
+          <img
+            src="/logo.jpg"
+            alt="Logo"
+            className="mx-auto mb-4 w-24 h-24 object-contain"
+          />
+          <Title level={2}>Bejuwaan Admin Login</Title>
           <Text type="secondary">Sign in with your account</Text>
         </div>
 
