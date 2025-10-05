@@ -13,7 +13,7 @@ if (!admin.apps.length) {
     credential: admin.credential.cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      privateKey:"-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDPbYGE50LYYhsN\nPGd7fDN0jCkSrMfY/AAlKd0LrYyjYeH5EcKPQEFgcpQhA2MjkB3XE7dn2eAU5qTC\n...your key...\n-----END PRIVATE KEY-----\n".replace(/\\n/g, "\n"),
     }),
     storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
   });
