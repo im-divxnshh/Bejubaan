@@ -1,0 +1,38 @@
+{
+  "name": "bejubaan",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^6.0.2",
+    "antd": "^5.27.4",
+    "dotenv": "^17.2.3",
+    "firebase": "^12.2.1",
+    "firebase-admin": "^13.5.0",
+    "framer-motion": "^12.23.13",
+    "install": "^0.13.0",
+    "lucide-react": "^0.544.0",
+    "next": "15.5.3",
+    "npm": "^11.6.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-router-dom": "^7.9.1",
+    "sweetalert2": "^11.23.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.3",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
