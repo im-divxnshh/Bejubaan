@@ -141,9 +141,14 @@ const AddingDoctor: React.FC = () => {
             setPreviewPhoto(null);
             setPreviewAadhar(null);
             setPreviewPan(null);
-        } catch (error: any) {
-            Swal.fire({ icon: "error", title: "Error", text: error.message });
-        } finally {
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                Swal.fire({ icon: "error", title: "Error", text: error.message });
+            } else {
+                Swal.fire({ icon: "error", title: "Error", text: "An unknown error occurred." });
+            }
+        }
+        finally {
             setLoading(false);
         }
     };
