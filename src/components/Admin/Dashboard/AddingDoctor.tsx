@@ -7,7 +7,6 @@ import {
     doc,
     onSnapshot,
     setDoc,
-    getDoc,
 } from "firebase/firestore";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import {
@@ -55,7 +54,6 @@ const AddingDoctor: React.FC = () => {
     const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
     const [viewOpen, setViewOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [loadingDelete, setLoadingDelete] = useState(false);
 
     // ✅ Real-time listener for doctors
     useEffect(() => {
@@ -143,75 +141,29 @@ const AddingDoctor: React.FC = () => {
             setPreviewPhoto(null);
             setPreviewAadhar(null);
             setPreviewPan(null);
-        } catch (error: unknown) {
-            let message = "Unknown error";
-            if (error instanceof Error) message = error.message;
-            Swal.fire({ icon: "error", title: "Error", text: message });
+        } catch (error: any) {
+            Swal.fire({ icon: "error", title: "Error", text: error.message });
         } finally {
             setLoading(false);
         }
     };
 
-   
+    const handleDelete = async (id: string) => {
+        const confirm = await Swal.fire({
+            title: "Are you sure?",
+            text: "This will permanently delete the doctor profile!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!",
+        });
 
-    const handleDelete = async (uid: string) => {
+        if (!confirm.isConfirmed) return;
         try {
-            // Show confirmation dialog
-            const confirm = await Swal.fire({
-                title: "Are you sure?",
-                text: "This will permanently delete the doctor profile, their documents, and account!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "Yes, delete it!",
-            });
-
-            if (!confirm.isConfirmed) return;
-
-            setLoadingDelete(true); // Start spinner
-
-            // 1️⃣ Delete Firestore document and Storage files
-            const docRef = doc(db, "doctors", uid);
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-                const data = docSnap.data() as {
-                    photoURL?: string;
-                    aadharCardPhoto?: string;
-                    panCardPhoto?: string;
-                };
-
-                const deleteStorageFile = async (url?: string) => {
-                    if (!url) return;
-                    try {
-                        const path = decodeURIComponent(url.split("/o/")[1].split("?")[0]);
-                        const fileRef = ref(storage, path);
-                        await deleteObject(fileRef);
-                    } catch (err) {
-                        console.warn("Error deleting file:", err);
-                    }
-                };
-
-                await Promise.all([
-                    deleteStorageFile(data.photoURL),
-                    deleteStorageFile(data.aadharCardPhoto),
-                    deleteStorageFile(data.panCardPhoto),
-                ]);
-
-                await deleteDoc(docRef);
-            }
-
-            // 2️⃣ Call API to delete Firebase Auth user
-            const response = await fetch("/api/doctors/delete", {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ uid }),
-            });
-
-            const resData = await response.json().catch(() => ({ message: "Unknown error" }));
-            if (!response.ok) throw new Error(resData?.message || "Failed to delete doctor");
-
+            await deleteDoc(doc(db, "doctors", id));
+            const photoRef = ref(storage, `doctorsData/profilePhoto/${id}`);
+            await deleteObject(photoRef).catch(() => { });
             Swal.fire({
                 icon: "success",
                 title: "Doctor Deleted!",
@@ -220,19 +172,10 @@ const AddingDoctor: React.FC = () => {
                 showConfirmButton: false,
                 timer: 1500,
             });
-
-            setViewOpen(false);
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : "Unknown error";
-            Swal.fire({ icon: "error", title: "Error", text: message });
-        } finally {
-            setLoadingDelete(false); // Stop spinner
+        } catch {
+            Swal.fire({ icon: "error", title: "Error deleting doctor" });
         }
     };
-
-
-
-
 
     const filteredDoctors = doctors.filter((d) =>
         d.name.toLowerCase().includes(search.toLowerCase())
@@ -260,15 +203,17 @@ const AddingDoctor: React.FC = () => {
                                     <div className="relative group">
                                         <img src={preview} alt={label} className="w-24 h-24 rounded-lg object-cover border" />
                                         <Button
-                                            danger
                                             icon={<DeleteOutlined />}
-                                            onClick={() => selectedDoctor && handleDelete(selectedDoctor.id)}
-                                            className="rounded-lg px-5 py-2 font-semibold shadow hover:scale-105 transition-transform"
-                                            loading={loadingDelete} // this will show spinner automatically
-                                        >
-                                            Delete Doctor
-                                        </Button>
-
+                                            onClick={() => {
+                                                if (name === "photoURL") setPreviewPhoto(null);
+                                                if (name === "aadharCardPhoto") setPreviewAadhar(null);
+                                                if (name === "panCardPhoto") setPreviewPan(null);
+                                                setForm(f => ({ ...f, [name]: null }));
+                                            }}
+                                            className="absolute top-0 right-0 opacity-80"
+                                            danger
+                                            size="small"
+                                        />
                                     </div>
                                 ) : (
                                     <label className="w-24 h-24 border rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-100">
