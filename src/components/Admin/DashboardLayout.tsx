@@ -68,7 +68,7 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
           placement="left"
           onClose={handleDrawerToggle}
           open={drawerVisible}
-          bodyStyle={{ padding: 0 }}
+          style={{ padding: 0 }}
         >
           <Menu mode="inline" items={menuItems} />
         </Drawer>
