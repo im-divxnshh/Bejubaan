@@ -1,8 +1,13 @@
+// utils/FirebaseAdmin.ts
 import * as admin from "firebase-admin";
 
 let adminApp: admin.app.App;
 
-if (!admin.apps.length) {
+export const getAdmin = () => {
+  if (admin.apps.length) {
+    return admin.app();
+  }
+
   if (!process.env.FIREBASE_PROJECT_ID ||
       !process.env.FIREBASE_CLIENT_EMAIL ||
       !process.env.FIREBASE_PRIVATE_KEY) {
@@ -17,8 +22,6 @@ if (!admin.apps.length) {
     }),
     storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
   });
-} else {
-  adminApp = admin.app();
-}
 
-export { adminApp as admin };
+  return adminApp;
+};
