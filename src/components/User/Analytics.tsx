@@ -74,7 +74,7 @@ const ViewReports: React.FC = () => {
                   Share via WhatsApp
                 </Button>
               </div>
-             </Card> 
+            </Card>
           );
         })
       )}
