@@ -7,6 +7,7 @@ import {
     doc,
     onSnapshot,
     setDoc,
+    getDoc,
 } from "firebase/firestore";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import {
@@ -151,29 +152,65 @@ const AddingDoctor: React.FC = () => {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        const confirm = await Swal.fire({
-            title: "Are you sure?",
-            text: "This will permanently delete the doctor profile, their documents, and account!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Yes, delete it!",
-        });
+   
 
-        if (!confirm.isConfirmed) return;
-
+    const handleDelete = async (uid: string) => {
         try {
-            setLoadingDelete(true); // start spinner
-
-            const res = await fetch("/api/doctors/delete", {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ uid: id }),
+            // Show confirmation dialog
+            const confirm = await Swal.fire({
+                title: "Are you sure?",
+                text: "This will permanently delete the doctor profile, their documents, and account!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, delete it!",
             });
 
-            if (!res.ok) throw new Error("Failed to delete doctor");
+            if (!confirm.isConfirmed) return;
+
+            setLoadingDelete(true); // Start spinner
+
+            // 1️⃣ Delete Firestore document and Storage files
+            const docRef = doc(db, "doctors", uid);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data() as {
+                    photoURL?: string;
+                    aadharCardPhoto?: string;
+                    panCardPhoto?: string;
+                };
+
+                const deleteStorageFile = async (url?: string) => {
+                    if (!url) return;
+                    try {
+                        const path = decodeURIComponent(url.split("/o/")[1].split("?")[0]);
+                        const fileRef = ref(storage, path);
+                        await deleteObject(fileRef);
+                    } catch (err) {
+                        console.warn("Error deleting file:", err);
+                    }
+                };
+
+                await Promise.all([
+                    deleteStorageFile(data.photoURL),
+                    deleteStorageFile(data.aadharCardPhoto),
+                    deleteStorageFile(data.panCardPhoto),
+                ]);
+
+                await deleteDoc(docRef);
+            }
+
+            // 2️⃣ Call API to delete Firebase Auth user
+            const response = await fetch("/api/doctors/delete", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ uid }),
+            });
+
+            const resData = await response.json().catch(() => ({ message: "Unknown error" }));
+            if (!response.ok) throw new Error(resData?.message || "Failed to delete doctor");
 
             Swal.fire({
                 icon: "success",
@@ -185,14 +222,15 @@ const AddingDoctor: React.FC = () => {
             });
 
             setViewOpen(false);
-        } catch (error: unknown) {
-            let message = "Unknown error";
-            if (error instanceof Error) message = error.message;
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Unknown error";
             Swal.fire({ icon: "error", title: "Error", text: message });
         } finally {
-            setLoadingDelete(false); // stop spinner
+            setLoadingDelete(false); // Stop spinner
         }
     };
+
+
 
 
 
