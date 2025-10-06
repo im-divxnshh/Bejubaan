@@ -67,7 +67,7 @@ const ManageReports: React.FC = () => {
       setLoading(true);
       try {
         const snapshot = await getDocs(collection(db, "reports")); // get all reports
-        let allReports: ReportType[] = snapshot.docs
+        const allReports: ReportType[] = snapshot.docs
           .map(doc => doc.data() as ReportType)
           .filter(report => report.userId === userId); // filter by logged-in user
 
