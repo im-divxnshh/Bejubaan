@@ -20,15 +20,16 @@ import { doc, getDoc } from "firebase/firestore";
 
 import DoctorDashboard from "./Dashboard";
 import DoctorProfile from "./Profile";
-
+import AppointmentPage from "./Appointment";
+import ManageAppointment from "./ManageAppointment";
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
 
 // Components for each page
 const DashboardPage = () => <div><DoctorDashboard/></div>;
-const AppointmentsPage = () => <div>Appointments Content</div>;
-const PrescriptionsPage = () => <div>Manage Appointments Content</div>;
+const AppointmentsPage = () => <div><AppointmentPage/></div>;
+const PrescriptionsPage = () => <div><ManageAppointment/></div>;
 const AnalyticsPage = () => <div>Analytics Content</div>;
 const ProfilePage = () => <div><DoctorProfile/></div>;
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, sendPasswordResetEmail } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { auth, db, storage } from "@/utils/FirebaseConfig";
@@ -14,6 +14,7 @@ import {
     SaveOutlined,
     CloseOutlined,
     UploadOutlined,
+    LockOutlined,
     SafetyCertificateOutlined,
 } from "@ant-design/icons";
 import { Image } from "antd";
@@ -27,6 +28,7 @@ interface DoctorProfileType {
     photoURL?: string | null;
     aadharCardPhoto?: string | null;
     panCardPhoto?: string | null;
+    location?: { lat: number; lng: number }; 
 
 }
 
@@ -42,6 +44,7 @@ const DoctorProfile: React.FC = () => {
     const [photoURL, setPhotoURL] = useState<string | null>(null);
     const [aadharCardPhoto, setAadharCardPhoto] = useState<string | null>(null);
     const [panCardPhoto, setPanCardPhoto] = useState<string | null>(null);
+    const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
 
     const [uploading, setUploading] = useState(false);
 
@@ -62,7 +65,7 @@ const DoctorProfile: React.FC = () => {
                     setPhotoURL(data.photoURL || null);
                     setAadharCardPhoto(data.aadharCardPhoto || null);
                     setPanCardPhoto(data.panCardPhoto || null);
-
+                    setLocation(data.location || null);
                 }
             } catch (err) {
                 console.error("Error fetching doctor data:", err);
@@ -88,6 +91,7 @@ const DoctorProfile: React.FC = () => {
                 specialization: newSpecialization,
                 qualification: newQualification,
                 photoURL,
+                location: location ? { lat: location.lat, lng: location.lng } : null,
             });
 
             Swal.fire({
@@ -167,6 +171,33 @@ const DoctorProfile: React.FC = () => {
             });
         } finally {
             setUploading(false);
+        }
+    };
+
+    const handleForgotPassword = async () => {
+        if (!auth.currentUser?.email) return;
+
+        try {
+            await sendPasswordResetEmail(auth, auth.currentUser.email);
+            Swal.fire({
+                toast: true,
+                position: "top-end",
+                icon: "info",
+                title: "Password reset email sent!",
+                showConfirmButton: false,
+                timer: 2500,
+                timerProgressBar: true,
+            });
+        } catch (error) {
+            console.error("Password reset error:", error);
+            Swal.fire({
+                toast: true,
+                position: "top-end",
+                icon: "error",
+                title: "Failed to send reset email!",
+                showConfirmButton: false,
+                timer: 2500,
+            });
         }
     };
 
@@ -313,6 +344,100 @@ const DoctorProfile: React.FC = () => {
                 </div>
             </div>
 
+            {/* Location Section */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <div>
+                    <label className="block text-gray-600 font-medium mb-1 items-center gap-1">
+                        🌍 Latitude
+                    </label>
+                    <input
+                        type="number"
+                        value={location?.lat || ""}
+                        onChange={(e) =>
+                            setLocation((prev) => ({
+                                lat: parseFloat(e.target.value) || 0,
+                                lng: prev?.lng || 0,
+                            }))
+                        }
+                        disabled={!editing}
+                        className={`w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400 ${!editing ? "bg-gray-100" : ""
+                            }`}
+                        placeholder="Enter latitude"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-gray-600 font-medium mb-1 items-center gap-1">
+                        📍 Longitude
+                    </label>
+                    <input
+                        type="number"
+                        value={location?.lng || ""}
+                        onChange={(e) =>
+                            setLocation((prev) => ({
+                                lng: parseFloat(e.target.value) || 0,
+                                lat: prev?.lat || 0,
+                            }))
+                        }
+                        disabled={!editing}
+                        className={`w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400 ${!editing ? "bg-gray-100" : ""
+                            }`}
+                        placeholder="Enter longitude"
+                    />
+                </div>
+
+                {editing && (
+                    <div className="sm:col-span-2 flex items-center gap-3 mt-2">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (!navigator.geolocation) {
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Geolocation not supported",
+                                        text: "Your browser doesn’t support location detection.",
+                                    });
+                                    return;
+                                }
+                                navigator.geolocation.getCurrentPosition(
+                                    (pos) => {
+                                        const lat = pos.coords.latitude;
+                                        const lng = pos.coords.longitude;
+                                        setLocation({ lat, lng });
+                                        Swal.fire({
+                                            toast: true,
+                                            position: "top-end",
+                                            icon: "success",
+                                            title: "Location detected!",
+                                            showConfirmButton: false,
+                                            timer: 2000,
+                                        });
+                                    },
+                                    () => {
+                                        Swal.fire({
+                                            icon: "error",
+                                            title: "Location access denied",
+                                            text: "Please allow location permission in your browser.",
+                                        });
+                                    }
+                                );
+                            }}
+                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow transition"
+                        >
+                            Use My Current Location
+                        </button>
+
+                        {location && (
+                            <p className="text-sm text-gray-600">
+                                📍 Current: Lat <strong>{location.lat.toFixed(5)}</strong>, Lng{" "}
+                                <strong>{location.lng.toFixed(5)}</strong>
+                            </p>
+                        )}
+                    </div>
+                )}
+            </div>
+
+
             {/* Buttons */}
             <div className="flex flex-wrap gap-3 mt-4">
                 {!editing ? (
@@ -339,6 +464,12 @@ const DoctorProfile: React.FC = () => {
                     </>
                 )}
             </div>
+            <button
+                onClick={handleForgotPassword}
+                className="flex items-center gap-2 px-5 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition"
+            >
+                <LockOutlined /> Forgot Password
+            </button>
         </div>
     );
 };
