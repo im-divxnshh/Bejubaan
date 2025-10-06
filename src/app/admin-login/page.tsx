@@ -14,12 +14,10 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // ✅ Function to generate random code string
   const generateCode = () => {
     return Math.random().toString(36).substring(2, 10); // e.g. "a9x8p3kl"
   };
 
-  // ✅ Redirect if already logged in
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
       if (user) {
@@ -34,13 +32,23 @@ const Login: React.FC = () => {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
+
+      // ✅ Modern success toast
       Swal.fire({
+        toast: true,
+        position: "top-end",
         icon: "success",
-        title: "Welcome back! 🎉",
+        title: "Welcome back 🎉",
         text: "You are now logged in.",
-        timer: 2000,
         showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        background: "#fff",
+        customClass: {
+          popup: "shadow-lg rounded-lg text-sm",
+        },
       });
+
       const code = generateCode();
       router.push(`/admin-dashboard/${code}`);
     } catch (error: unknown) {
@@ -48,15 +56,27 @@ const Login: React.FC = () => {
       if (error instanceof Error) {
         message = error.message;
       }
+
+      // ❌ Modern error toast
       Swal.fire({
+        toast: true,
+        position: "top-end",
         icon: "error",
         title: "Login failed",
         text: message,
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        background: "#fff",
+        customClass: {
+          popup: "shadow-lg rounded-lg text-sm",
+        },
       });
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="flex h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black">

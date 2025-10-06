@@ -95,7 +95,7 @@ const UserDashboardLayout: React.FC = () => {
           <div className="flex items-center justify-center py-4">
             <Avatar
               size={collapsed ? 40 : 64}
-              src={photoURL || "/default-avatar.png"}
+              src={photoURL || "/logo.jpg"}
               icon={!photoURL && <UserOutlined />}
               style={{ border: "2px solid #2563eb" }}
             />
